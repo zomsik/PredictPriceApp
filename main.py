@@ -1,4 +1,4 @@
-from data.loadData import loadData
+from functions.loadData import loadData
 from server.initServer import server
 import datetime
 
@@ -8,12 +8,8 @@ symbol = "CL=F"
 
 
 
-def main():
-    data = loadData(symbol, start_date, end_date)
-    server.run(host='localhost', port=8000, debug=True)
+
+data = loadData(symbol, start_date, end_date)
+server.run(host='localhost', port=8000, debug=True)
 
     
-
-     
-if __name__ == '__main__':
-     main()     
