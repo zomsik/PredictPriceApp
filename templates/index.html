@@ -8,8 +8,8 @@
     <h1>Dodawanie symbolu</h1>
 
     <form method="POST" action="/add_symbol">
-        <label for="symbol">Symbol:</label>
-        <input type="text" id="symbol" name="symbol" required>
+        <label for="addSymbol">Symbol:</label>
+        <input type="text" id="addSymbol" name="addSymbol" required>
 
         <button type="submit">Dodaj</button>
     </form>
@@ -26,6 +26,7 @@
     <form id="stockForm">
         <label for="symbol">Wybierz symbol akcji:</label>
         <select name="symbol" id="symbol">
+            <option disabled selected value="">Wybierz symbol</option>
             {% for symbol in symbols %}
             <option value="{{ symbol }}">{{ symbol }}</option>
             {% endfor %}

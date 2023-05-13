@@ -18,14 +18,14 @@ def index():
         'title': 'Raport predykcji cen akcji',
         'content': 'Przykładowa zawartość raportu'
     }
-    
-    return render_template('index.html', data=report_data, symbols=load_symbols_list())
+
+    return render_template('index.html', data=report_data, symbols=load_symbols_list("symbols.json"), komunikat=komunikat)
 
 
 
 @server.route('/add_symbol', methods=['POST'])
 def add_symbol():
-    symbol = request.form['symbol']
+    symbol = request.form['addSymbol']
 
     response = downloadNewSymbolData(symbol)
     return redirect('/?komunikat='+response)

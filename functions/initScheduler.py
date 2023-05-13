@@ -3,7 +3,7 @@ import time
 import threading
 import datetime
 import socket
-from static.symbols import symbolsList
+from functions.fileManipulation import load_symbols_list
 from functions.downloadData import downloadData
 
 def check_internet_connection():
@@ -15,12 +15,13 @@ def check_internet_connection():
     return False
 
 
-def makePredictions():
+def makeDailyTask():
     today_date = datetime.date.today()  
     if check_internet_connection():
-        for symbol in symbolsList:
+        for symbol in load_symbols_list("symbols.json"):
             todayData = downloadData(symbol,today_date,today_date)
             print(todayData)
+            #dodać do danych dzisiejszy dzień i predyktować tydzień
 
     else:
         print("Brak internetu")
@@ -29,7 +30,7 @@ def makePredictions():
 
 
 def run_schedule():
-    schedule.every(20).seconds.do(makePredictions)  
+    #schedule.every(20).seconds.do(makeDailyTask)  
     
     while True:
         schedule.run_pending()
