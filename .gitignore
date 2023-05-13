@@ -1,4 +1,6 @@
 static/plots/*
+data/data_*
+processing/data_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
