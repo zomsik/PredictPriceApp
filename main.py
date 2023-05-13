@@ -1,4 +1,3 @@
-from functions.loadData import loadData
 from functions.initScheduler import initScheduler
 from server.initServer import server
 import datetime

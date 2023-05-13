@@ -5,17 +5,33 @@
 </head>
 <body>
     
+    <h1>Dodawanie symbolu</h1>
+
+    <form method="POST" action="/add_symbol">
+        <label for="symbol">Symbol:</label>
+        <input type="text" id="symbol" name="symbol" required>
+
+        <button type="submit">Dodaj</button>
+    </form>
+
+    {% if komunikat %}
+        {% if komunikat != "" %}
+            <p>{{ komunikat }}</p>
+        {% endif %}
+    {% endif %}
 
 
     <h1>Formularz wyboru symbolu akcji</h1>
+
     <form id="stockForm">
         <label for="symbol">Wybierz symbol akcji:</label>
-        <select id="symbol" name="symbol">
-            <option value="W">W</option>
-            <option value="AAPL">AAPL</option>
-            <option value="MSFT">MSFT</option>
+        <select name="symbol" id="symbol">
+            {% for symbol in symbols %}
+            <option value="{{ symbol }}">{{ symbol }}</option>
+            {% endfor %}
         </select>
     </form>
+
     <div id="plotContainer">
         <!-- Tutaj będzie wyświetlany wygenerowany wykres -->
     </div>

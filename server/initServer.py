@@ -1,19 +1,34 @@
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request
 import matplotlib
+
+from functions.createNewSymbol import downloadNewSymbolData
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
+from functions.fileManipulation import load_symbols_list
 
 server = Flask(__name__, template_folder='../templates', static_folder='../static')
 
 
 @server.route('/')
 def index():
+    komunikat = request.args.get('komunikat')
+
     report_data = {
         'title': 'Raport predykcji cen akcji',
         'content': 'Przykładowa zawartość raportu'
     }
-    return render_template('index.html', data=report_data)
+    
+    return render_template('index.html', data=report_data, symbols=load_symbols_list())
+
+
+
+@server.route('/add_symbol', methods=['POST'])
+def add_symbol():
+    symbol = request.form['symbol']
+
+    response = downloadNewSymbolData(symbol)
+    return redirect('/?komunikat='+response)
 
 @server.route('/generate_plot')
 def generate_plot():
