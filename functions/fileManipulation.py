@@ -3,15 +3,56 @@ import os
 
 folder = 'data/'
 
-def checkIfFileExists(filename): 
+# Data files
+
+def checkIfFileDataExists(filename): 
+    path = os.path.join(folder, filename)
+    if not os.path.exists(path):
+        with open(path, 'w') as file:
+            file.write()
+
+def loadData(filename):
+    checkIfFileDataExists(filename)
+    path = os.path.join(folder, filename)
+    jsonData = {}
+    with open(path, 'r') as file:
+        jsonData = json.load(file)
+    return jsonData
+
+def checkIfDateAlreadyInFile(filename, date):
+    jsonData = loadData(filename)
+
+    if date in jsonData:
+        return True
+    else:
+        return False
+
+def createFileWithData(filename, data): 
+    path = os.path.join(folder, filename)
+    if not os.path.exists(path):
+        with open(path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+def appendData(filename, data):
+    checkIfFileDataExists(filename)
+    path = os.path.join(folder, filename)
+    with open(path, 'r+') as file:
+        file_data = json.load(file)
+        file_data.append(data)
+        #file.seek(0)
+        json.dump(file_data, file, indent=4)
+        #file.truncate()
+
+#Symbol files
+
+def checkIfFileSymbolsExists(filename): 
     path = os.path.join(folder, filename)
     if not os.path.exists(path):
         with open(path, 'w') as file:
             json.dump([], file)
 
-
-def append_symbol_to_json(filename,symbol):
-    checkIfFileExists(filename)
+def appendSymbol(filename,symbol):
+    checkIfFileSymbolsExists(filename)
     path = os.path.join(folder, filename)
     #filename = 'data_'+symbol+'.json'
     with open(path, 'r+') as file:
@@ -21,22 +62,17 @@ def append_symbol_to_json(filename,symbol):
         json.dump(file_data, file, indent=4)
         file.truncate()
 
-
-def load_symbols_list(filename):
-    checkIfFileExists(filename)
+def getSymbolList(filename):
+    checkIfFileSymbolsExists(filename)
     path = os.path.join(folder, filename)
+    symbols_data = {}
     with open(path, 'r') as file:
         symbols_data = json.load(file)
 
-    symbols_list = symbols_data
+    return symbols_data
 
-    return symbols_list
-
-def check_data_existence(filename, symbol):
-    checkIfFileExists(filename)
-    path = os.path.join(folder, filename)
-    with open(path, 'r') as file:
-        symbols_data = json.load(file)
+def checkIfSymbolInFile(filename, symbol):
+    symbols_data = getSymbolList(filename)
 
     if symbol in symbols_data:
         return True

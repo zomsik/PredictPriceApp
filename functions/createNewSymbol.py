@@ -1,23 +1,35 @@
 import datetime
+import threading
 from functions.downloadData import downloadData
-from functions.fileManipulation import check_data_existence, append_symbol_to_json
+from functions.fileManipulation import createFileWithData, checkIfSymbolInFile, appendSymbol
 from functions.initScheduler import check_internet_connection
 
 def downloadNewSymbolData(symbol):
     today_date = datetime.date.today()  
-    start_date = today_date - datetime.timedelta(days=90)
+    start_date = today_date - datetime.timedelta(days=30)
 
     if check_internet_connection():
-        if not check_data_existence("symbols.json", symbol):
-            threeMonthData = downloadData(symbol,start_date,today_date)
-            if not threeMonthData.empty:
-                #append_data_to_json("data_"+symbol+".json", threeMonthData)
-                append_symbol_to_json('symbols.json',symbol)
-                #predyktowanie
-                return "Pobrano nowy symbol"
+        if not checkIfSymbolInFile("symbols.json", symbol):
+            newDownloadedData = downloadData(symbol,start_date,today_date)
+            if not newDownloadedData.empty:
+                threading.Thread(target=workWithNewData(newDownloadedData, symbol)).start()
+                return "Pobrano nowy symbol. Będzie on dostępny do wybrania po predykcji"
             else:
                 return "Brak danych dla symbolu - możliwe, że nie istnieje"
         else:
             return "symbol już został dodany"
     else:
         return "Brak internetu"
+
+def workWithNewData(newDownloadedData, symbol):
+    
+    new_data = {}
+    newDownloadedData['Status'] = "Real"
+
+    for index, row in newDownloadedData.iterrows():
+        row_dict = row.to_dict()
+        new_data[index.strftime('%Y-%m-%d')] = row_dict
+                
+    createFileWithData("data_"+symbol+".json", new_data)
+    appendSymbol('symbols.json',symbol)
+    #predyktowanie

@@ -5,7 +5,7 @@ from functions.createNewSymbol import downloadNewSymbolData
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
-from functions.fileManipulation import load_symbols_list
+from functions.fileManipulation import getSymbolList
 
 server = Flask(__name__, template_folder='../templates', static_folder='../static')
 
@@ -19,7 +19,7 @@ def index():
         'content': 'Przykładowa zawartość raportu'
     }
 
-    return render_template('index.html', data=report_data, symbols=load_symbols_list("symbols.json"), komunikat=komunikat)
+    return render_template('index.html', data=report_data, symbols=getSymbolList("symbolsPredicted.json"), komunikat=komunikat)
 
 
 
