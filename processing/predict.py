@@ -10,12 +10,6 @@ from functions.fileManipulation import loadData, saveDataToFile, appendSymbol
 pastDaysNumber = 30
 predictionDaysNumber = 7
 
-def loadData(filename):
-    jsonData = {}
-    with open(filename, 'r') as file:
-        jsonData = json.load(file)
-    return jsonData
-
 def prepareData(dataJson):
     selected_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
     data = pd.DataFrame.from_dict(dataJson, orient='index')
