@@ -24,8 +24,8 @@
     <h1>Formularz wyboru symbolu akcji</h1>
 
     <form id="stockForm">
-        <label for="symbol">Wybierz symbol akcji:</label>
-        <select name="symbol" id="symbol">
+        <label for="selectbox">Wybierz symbol akcji:</label>
+        <select id="selectbox" onchange="updatePlotly()">
             <option disabled selected value="">Wybierz symbol</option>
             {% for symbol in symbols %}
             <option value="{{ symbol }}">{{ symbol }}</option>
@@ -39,30 +39,25 @@
 
     <script>
         // Funkcja obsługująca zmianę wyboru symbolu
-        function handleSymbolChange() {
-            // Pobierz wartość wybranego symbolu
-            var selectedSymbol = document.getElementById("symbol").value;
+        function updatePlotly() {
+            var selectbox = document.getElementById('selectbox');
+            var selectedSymbol = selectbox.value;
 
-            // Wyślij żądanie do serwera
+            // Wywołanie asynchronicznego żądania AJAX do serwera Flask
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/generate_plot?symbol=" + selectedSymbol, true);
-            xhr.onreadystatechange = function() {
+            xhr.open('GET', '/update-data?symbol=' + selectedSymbol, true);
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Odbierz odpowiedź z nazwą wygenerowanego pliku obrazu
-                    var plotFileName = xhr.responseText;
-                    // Zaktualizuj źródło obrazu na stronie
-                    var plotImage = document.createElement("img");
-                    plotImage.src = "/static/plots/" + plotFileName;
-                    plotImage.alt = "Wygenerowany wykres";
-                    document.getElementById("plotContainer").innerHTML = "";
-                    document.getElementById("plotContainer").appendChild(plotImage);
+                    var response = JSON.parse(xhr.responseText);
+                    var data = response.data;
+                    var layout = response.layout;
+
+                    // Wygeneruj wykres Plotly z nowymi danymi i układem
+                    Plotly.newPlot('plotContainer', data, layout);
                 }
             };
             xhr.send();
         }
-
-        // Dodaj nasłuchiwanie na zmianę wyboru symbolu
-        document.getElementById("symbol").addEventListener("change", handleSymbolChange);
     </script>
 </body>
 </html>

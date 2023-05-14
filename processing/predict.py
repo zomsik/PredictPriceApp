@@ -1,5 +1,3 @@
-import os
-import json
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
@@ -40,8 +38,10 @@ def getFittedModel(X, Y):
     model.compile(loss='mean_squared_error', optimizer='adam')
     model.fit(X, Y, epochs=100, batch_size=32, verbose=0)
 
-def generatePredictions(model, scaler):
-    X_ = y[- pastDaysNumber:]  # last available input sequence
+    return model
+
+def generatePredictions(model, scaler, y):
+    X_ = y[- pastDaysNumber:]
     X_ = X_.reshape(1, pastDaysNumber, 1)
 
     Y_ = model.predict(X_).reshape(-1, 1)
@@ -54,8 +54,11 @@ def getActualDataFrame(data):
     actualDF.rename(columns={'index': 'Date', 'Close': 'Actual'}, inplace=True)
     actualDF['Date'] = pd.to_datetime(actualDF['Date'])
     actualDF['Forecast'] = np.nan
-    actualDF['Forecast'].iloc[-1] = actualDF['Actual'].iloc[-1]
+    actualDF.loc[actualDF.index[-1], 'Forecast'] = actualDF.loc[actualDF.index[-1], 'Actual']
 
+    
+    actualDF['Test'] = 'Real'
+    
     return actualDF
 
 def getPredictionDataFrame(actualDF, Y_):
@@ -63,27 +66,40 @@ def getPredictionDataFrame(actualDF, Y_):
     predictionDF['Date'] = pd.date_range(start=actualDF['Date'].iloc[-1] + pd.Timedelta(days=1), periods=predictionDaysNumber)
     predictionDF['Forecast'] = Y_.flatten()
     predictionDF['Actual'] = np.nan
+    predictionDF['Test'] = "Future"
 
     return predictionDF
 
 def makePrediction(symbol):
-    dataJson = loadData(symbol)
+    dataJson = loadData("data_"+symbol+".json")
     
     data, y = prepareData(dataJson)
-
+    
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaler = scaler.fit(y)
     y = scaler.transform(y)
 
     X, Y = getPastAndPredictionData(y)
 
+    if X.size == 0 or y.size == 0:
+        return
+    
     model = getFittedModel(X, Y)
 
-    X_, Y_ = generatePredictions(model, scaler)
-
+    X_, Y_ = generatePredictions(model, scaler, y)
+    
     actualDF = getActualDataFrame(data)
     predictionDF = getPredictionDataFrame(actualDF, Y_)
 
     results = pd.concat([actualDF, predictionDF]).set_index('Date')
-    saveDataToFile(symbol+"_plotData.json",results)
+    return results
+    resultsJson = {}
+    
+    for index, row in results.iterrows():
+        row_dict = row.to_dict()
+        resultsJson[index.strftime('%Y-%m-%d')] = row_dict
+
+
+
+    saveDataToFile(symbol+"_plotData.json", resultsJson)
     appendSymbol("symbolsPredicted.json", symbol)

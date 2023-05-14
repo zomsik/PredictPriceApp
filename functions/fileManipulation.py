@@ -7,17 +7,18 @@ folder = 'data/'
 
 def checkIfFileDataExists(filename): 
     path = os.path.join(folder, filename)
-    if not os.path.exists(path):
-        with open(path, 'w') as file:
-            file.write()
+    if os.path.exists(path):
+        return True
+    return False
 
 def loadData(filename):
-    checkIfFileDataExists(filename)
-    path = os.path.join(folder, filename)
-    jsonData = {}
-    with open(path, 'r') as file:
-        jsonData = json.load(file)
-    return jsonData
+    if checkIfFileDataExists(filename):
+        path = os.path.join(folder, filename)
+        jsonData = {}
+        with open(path, 'r') as file:
+            jsonData = json.load(file)
+        return jsonData
+    pass
 
 def checkIfDateAlreadyInFile(filename, date):
     jsonData = loadData(filename)
@@ -31,17 +32,18 @@ def saveDataToFile(filename, data):
     path = os.path.join(folder, filename)
     if not os.path.exists(path):
         with open(path, 'w') as file:
-            json.dump(data, file, indent=4)
+            json.dump(data, file, indent=4, allow_nan=False)
 
 def appendData(filename, data):
-    checkIfFileDataExists(filename)
-    path = os.path.join(folder, filename)
-    with open(path, 'r+') as file:
-        file_data = json.load(file)
-        file_data.append(data)
-        #file.seek(0)
-        json.dump(file_data, file, indent=4)
-        #file.truncate()
+    if checkIfFileDataExists(filename):
+        path = os.path.join(folder, filename)
+        with open(path, 'r+') as file:
+            file_data = json.load(file)
+            file_data.append(data)
+            #file.seek(0)
+            json.dump(file_data, file, indent=4)
+            #file.truncate()
+
 
 #Symbol files
 
@@ -54,13 +56,13 @@ def checkIfFileSymbolsExists(filename):
 def appendSymbol(filename,symbol):
     checkIfFileSymbolsExists(filename)
     path = os.path.join(folder, filename)
-    #filename = 'data_'+symbol+'.json'
-    with open(path, 'r+') as file:
-        file_data = json.load(file)
-        file_data.append(symbol)
-        file.seek(0)
-        json.dump(file_data, file, indent=4)
-        file.truncate()
+    if not checkIfSymbolInFile(filename, symbol):
+        with open(path, 'r+') as file:
+            file_data = json.load(file)
+            file_data.append(symbol)
+            file.seek(0)
+            json.dump(file_data, file, indent=4)
+            file.truncate()
 
 def getSymbolList(filename):
     checkIfFileSymbolsExists(filename)

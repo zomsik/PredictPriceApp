@@ -1,7 +1,7 @@
 from functions.initScheduler import initScheduler
 from server.initServer import server
 
-from gevent.pywsgi import WSGIServer
+#from gevent.pywsgi import WSGIServer
 
 
 initScheduler()

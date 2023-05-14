@@ -1,11 +1,8 @@
-from flask import Flask, redirect, render_template, request
-import matplotlib
-
+from flask import Flask, jsonify, redirect, render_template, request
 from functions.createNewSymbol import downloadNewSymbolData
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import os
-from functions.fileManipulation import getSymbolList
+from functions.fileManipulation import getSymbolList, loadData
+import plotly.graph_objs as go
 
 server = Flask(__name__, template_folder='../templates', static_folder='../static')
 
@@ -13,13 +10,9 @@ server = Flask(__name__, template_folder='../templates', static_folder='../stati
 @server.route('/')
 def index():
     komunikat = request.args.get('komunikat')
+    symbolsPredicted = getSymbolList("symbolsPredicted.json")
 
-    report_data = {
-        'title': 'Raport predykcji cen akcji',
-        'content': 'Przykładowa zawartość raportu'
-    }
-
-    return render_template('index.html', data=report_data, symbols=getSymbolList("symbolsPredicted.json"), komunikat=komunikat)
+    return render_template('index.html', symbols=symbolsPredicted, komunikat=komunikat)
 
 
 
@@ -30,7 +23,7 @@ def add_symbol():
     response = downloadNewSymbolData(symbol)
     return redirect('/?komunikat='+response)
 
-@server.route('/generate_plot')
+'''@server.route('/generate_plot')
 def generate_plot():
     symbol = request.args.get('symbol')
 
@@ -50,4 +43,19 @@ def generate_plot():
     plt.clf()
 
     # Zwróć nazwę wygenerowanego pliku obrazu
-    return plot_filename
+    return plot_filename'''
+
+@server.route('/update-data')
+def update_data():
+    symbol = request.args.get('symbol')
+
+    data = loadData(symbol+"plotData.json")
+    
+    layout = go.Layout(
+        title='Przykładowy wykres Plotly',
+        xaxis=dict(title='Oś X'),
+        yaxis=dict(title='Oś Y')
+    )
+    
+    response = {'data': data, 'layout': layout}
+    return jsonify(response)
