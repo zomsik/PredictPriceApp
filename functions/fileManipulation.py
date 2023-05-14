@@ -27,7 +27,7 @@ def checkIfDateAlreadyInFile(filename, date):
     else:
         return False
 
-def createFileWithData(filename, data): 
+def saveDataToFile(filename, data): 
     path = os.path.join(folder, filename)
     if not os.path.exists(path):
         with open(path, 'w') as file:

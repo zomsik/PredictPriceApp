@@ -1,8 +1,9 @@
 import datetime
 import threading
 from functions.downloadData import downloadData
-from functions.fileManipulation import createFileWithData, checkIfSymbolInFile, appendSymbol
+from functions.fileManipulation import saveDataToFile, checkIfSymbolInFile, appendSymbol
 from functions.initScheduler import check_internet_connection
+from processing.predict import makePrediction
 
 def downloadNewSymbolData(symbol):
     today_date = datetime.date.today()  
@@ -30,6 +31,7 @@ def workWithNewData(newDownloadedData, symbol):
         row_dict = row.to_dict()
         new_data[index.strftime('%Y-%m-%d')] = row_dict
                 
-    createFileWithData("data_"+symbol+".json", new_data)
+    saveDataToFile("data_"+symbol+".json", new_data)
     appendSymbol('symbols.json',symbol)
-    #predyktowanie
+    
+    makePrediction(symbol)
