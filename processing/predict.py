@@ -11,12 +11,13 @@ predictionDaysNumber = 7
 def prepareData(dataJson):
     selected_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
     data = pd.DataFrame.from_dict(dataJson, orient='index')
+    pastPredicted = data['Real']
     data = data[selected_columns]
     data = data.fillna(method='ffill')
     y = data['Close']
     y = y.values.reshape(-1, 1)
 
-    return data, y
+    return data, y, pastPredicted
 
 def getPastAndPredictionData(y):
     X = []
@@ -50,30 +51,48 @@ def generatePredictions(model, scaler, y):
     return X_, Y_
 
 def getActualDataFrame(data):
-    actualDF = data[['Close']].reset_index()
-    actualDF.rename(columns={'index': 'Date', 'Close': 'Actual'}, inplace=True)
+    actualDF = data[['Close', 'Real']].reset_index()
+    actualDF.rename(columns={'index': 'Date', 'Close': 'Actual', 'Real': 'Real'}, inplace=True)
     actualDF['Date'] = pd.to_datetime(actualDF['Date'])
-    actualDF['Forecast'] = np.nan
-    actualDF.loc[actualDF.index[-1], 'Forecast'] = actualDF.loc[actualDF.index[-1], 'Actual']
+    actualDF['Future'] = np.nan
+    actualDF.loc[actualDF.index[-1], 'Future'] = actualDF.loc[actualDF.index[-1], 'Actual']
 
+    actualDF['Predicted'] = np.nan
     
-    actualDF['Test'] = 'Real'
+    actualDF['RealPom'] = True
+    
+    for indexDate, row in actualDF.iterrows():  
+        if row['Real'] is False:
+            actualDF.loc[indexDate, 'RealPom'] = False
+            
+            if indexDate-1 in actualDF.index:
+                actualDF.loc[indexDate-1, 'RealPom'] = False
+        
+            if indexDate+1 in actualDF.index:
+                actualDF.loc[indexDate+1, 'RealPom'] = False
+                
+
+    actualDF.loc[~actualDF['RealPom'], 'Predicted'] = actualDF.loc[~actualDF['RealPom'], 'Actual']
+    actualDF.loc[~actualDF['Real'], 'Actual'] = np.nan
+    
+    del actualDF['Real']
+    del actualDF['RealPom']
     
     return actualDF
 
 def getPredictionDataFrame(actualDF, Y_):
-    predictionDF = pd.DataFrame(columns=['Date', 'Actual', 'Forecast'])
+    predictionDF = pd.DataFrame(columns=['Date', 'Actual', 'Future'])
     predictionDF['Date'] = pd.date_range(start=actualDF['Date'].iloc[-1] + pd.Timedelta(days=1), periods=predictionDaysNumber)
-    predictionDF['Forecast'] = Y_.flatten()
+    predictionDF['Future'] = Y_.flatten()
     predictionDF['Actual'] = np.nan
-    predictionDF['Test'] = "Future"
+    predictionDF['Predicted'] = np.nan
 
     return predictionDF
 
 def makePrediction(symbol):
     dataJson = loadData("data_"+symbol+".json")
     
-    data, y = prepareData(dataJson)
+    data, y, pastIsReal = prepareData(dataJson)
     
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaler = scaler.fit(y)
@@ -88,7 +107,8 @@ def makePrediction(symbol):
 
     X_, Y_ = generatePredictions(model, scaler, y)
     
-    actualDF = getActualDataFrame(data)
+    dataWithReals = data.join(pastIsReal)
+    actualDF = getActualDataFrame(dataWithReals)
     predictionDF = getPredictionDataFrame(actualDF, Y_)
 
     results = pd.concat([actualDF, predictionDF]).set_index('Date')
@@ -99,7 +119,6 @@ def makePrediction(symbol):
         row_dict = row.to_dict()
         resultsJson[index.strftime('%Y-%m-%d')] = row_dict
 
-
-
     saveDataToFile(symbol+"_plotData.json", resultsJson)
     appendSymbol("symbolsPredicted.json", symbol)
+    

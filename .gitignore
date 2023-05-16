@@ -8,3 +8,9 @@ server/__pycache__/
 *.py[cod]
 *$py.class
 test.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+.spyproject/
+.spyproject/*

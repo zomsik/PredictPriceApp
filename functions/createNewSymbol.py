@@ -27,7 +27,7 @@ def downloadNewSymbolData(symbol):
 def workWithNewData(newDownloadedData, symbol):
     
     new_data = {}
-    newDownloadedData['Status'] = "Real"
+    newDownloadedData['Real'] = True
 
     for index, row in newDownloadedData.iterrows():
         row_dict = row.to_dict()
