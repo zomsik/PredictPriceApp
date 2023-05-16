@@ -8,7 +8,7 @@ from processing.predict import makePrediction
 def downloadNewSymbolData(symbol):
     today_date = datetime.date.today()  
     start_date = today_date - datetime.timedelta(days=90)
-
+    symbol = symbol.upper()
     if check_internet_connection():
         if not checkIfSymbolInFile("symbols.json", symbol):
             newDownloadedData = downloadData(symbol,start_date,today_date)

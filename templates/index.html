@@ -2,6 +2,10 @@
 <html>
 <head>
     <title>Formularz wyboru symbolu akcji</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+
 </head>
 <body>
     
@@ -38,22 +42,20 @@
     </div>
 
     <script>
-        // Funkcja obsługująca zmianę wyboru symbolu
+
         function updatePlotly() {
             var selectbox = document.getElementById('selectbox');
             var selectedSymbol = selectbox.value;
 
             // Wywołanie asynchronicznego żądania AJAX do serwera Flask
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/update-data?symbol=' + selectedSymbol, true);
+            xhr.open('GET', '/getPlotData?symbol=' + selectedSymbol, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
-                    var data = response.data;
-                    var layout = response.layout;
+                    var graphJSON = response.graphJSON;
+                    Plotly.newPlot('plotContainer', JSON.parse(graphJSON));
 
-                    // Wygeneruj wykres Plotly z nowymi danymi i układem
-                    Plotly.newPlot('plotContainer', data, layout);
                 }
             };
             xhr.send();

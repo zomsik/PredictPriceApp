@@ -4,7 +4,8 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.layers import Dense, LSTM
 from tensorflow.keras.models import Sequential
 from functions.fileManipulation import loadData, saveDataToFile, appendSymbol
-
+import simplejson
+from processing.plotCreation import createPlot
 pastDaysNumber = 30
 predictionDaysNumber = 7
 
@@ -54,10 +55,10 @@ def getActualDataFrame(data):
     actualDF = data[['Close', 'Real']].reset_index()
     actualDF.rename(columns={'index': 'Date', 'Close': 'Actual', 'Real': 'Real'}, inplace=True)
     actualDF['Date'] = pd.to_datetime(actualDF['Date'])
-    actualDF['Future'] = np.nan
+    actualDF['Future'] = None
     actualDF.loc[actualDF.index[-1], 'Future'] = actualDF.loc[actualDF.index[-1], 'Actual']
 
-    actualDF['Predicted'] = np.nan
+    actualDF['Predicted'] = None
     
     actualDF['RealPom'] = True
     
@@ -73,8 +74,7 @@ def getActualDataFrame(data):
                 
 
     actualDF.loc[~actualDF['RealPom'], 'Predicted'] = actualDF.loc[~actualDF['RealPom'], 'Actual']
-    actualDF.loc[~actualDF['Real'], 'Actual'] = np.nan
-    
+    actualDF.loc[~actualDF['Real'], 'Actual'] = None
     del actualDF['Real']
     del actualDF['RealPom']
     
@@ -84,8 +84,8 @@ def getPredictionDataFrame(actualDF, Y_):
     predictionDF = pd.DataFrame(columns=['Date', 'Actual', 'Future'])
     predictionDF['Date'] = pd.date_range(start=actualDF['Date'].iloc[-1] + pd.Timedelta(days=1), periods=predictionDaysNumber)
     predictionDF['Future'] = Y_.flatten()
-    predictionDF['Actual'] = np.nan
-    predictionDF['Predicted'] = np.nan
+    predictionDF['Actual'] = None
+    predictionDF['Predicted'] = None
 
     return predictionDF
 
@@ -112,13 +112,14 @@ def makePrediction(symbol):
     predictionDF = getPredictionDataFrame(actualDF, Y_)
 
     results = pd.concat([actualDF, predictionDF]).set_index('Date')
-    return results
+    results = results.replace(np.nan,None)
     resultsJson = {}
     
     for index, row in results.iterrows():
         row_dict = row.to_dict()
         resultsJson[index.strftime('%Y-%m-%d')] = row_dict
-
+    
     saveDataToFile(symbol+"_plotData.json", resultsJson)
+    createPlot(symbol)
     appendSymbol("symbolsPredicted.json", symbol)
     
