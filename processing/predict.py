@@ -4,7 +4,6 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.layers import Dense, LSTM
 from tensorflow.keras.models import Sequential
 from functions.fileManipulation import loadData, saveDataToFile, appendSymbol
-import simplejson
 from processing.plotCreation import createPlot
 pastDaysNumber = 30
 predictionDaysNumber = 7

@@ -1,5 +1,5 @@
 import plotly.graph_objs as go
-from functions.fileManipulation import loadData
+from functions.fileManipulation import loadData, savePlotToFile
 from datetime import datetime
 import plotly.offline as py
 import pandas as pd
@@ -23,5 +23,6 @@ def createPlot(symbol):
     fig.add_trace(go.Scatter(x=data['Date'], y=data['Future'], name='Future'))
     fig.add_trace(go.Scatter(x=data['Date'], y=data['Predicted'], name='Predicted'))
         
-
-    py.plot(fig, filename='templates/' + symbol + '.html')
+    divPlot = py.plot(fig, include_plotlyjs=False, output_type='div')
+    savePlotToFile(symbol+'.html', divPlot)
+    #py.plot(fig, filename='templates/' + symbol + '.html')

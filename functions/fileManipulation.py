@@ -1,8 +1,19 @@
 import json
 import os
-import numpy as np
-import pandas as pd
+
 folder = 'data/'
+
+
+def savePlotToFile(filename, data): 
+    path = os.path.join('static/plots', filename)
+    with open(path, 'w') as file:
+        file.write(data)
+        
+def loadPlotFromFile(symbol): 
+    path = os.path.join('static/plots', symbol+'.html')
+    with open(path, 'r') as file:
+        div = file.read()
+    return div
 
 # Data files
 

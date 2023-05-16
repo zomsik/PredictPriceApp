@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Formularz wyboru symbolu akcji</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 
@@ -38,7 +38,7 @@
     </form>
 
     <div id="plotContainer">
-        <!-- Tutaj będzie wyświetlany wygenerowany wykres -->
+
     </div>
 
     <script>
@@ -46,19 +46,17 @@
         function updatePlotly() {
             var selectbox = document.getElementById('selectbox');
             var selectedSymbol = selectbox.value;
-
-            // Wywołanie asynchronicznego żądania AJAX do serwera Flask
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/getPlotData?symbol=' + selectedSymbol, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    var graphJSON = response.graphJSON;
-                    Plotly.newPlot('plotContainer', JSON.parse(graphJSON));
-
-                }
-            };
+            if (selectedSymbol !== undefined) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/static/plots/" + selectedSymbol + ".html", true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200 || xhr.status === 304 ) {
+                        $('#plotContainer').html(xhr.responseText);
+                    }
+                };
             xhr.send();
+            }
+
         }
     </script>
 </body>

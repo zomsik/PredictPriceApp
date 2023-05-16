@@ -1,6 +1,6 @@
 from flask import Flask, redirect, render_template, request, url_for
 from functions.createNewSymbol import downloadNewSymbolData
-from functions.fileManipulation import getSymbolList
+from functions.fileManipulation import getSymbolList, loadPlotFromFile
 
 
 server = Flask(__name__, template_folder='../templates', static_folder='../static')
@@ -24,5 +24,7 @@ def add_symbol():
 def update_data():
     symbol = request.args.get('symbol')
     #return redirect(url_for('index'))
-    return render_template(symbol+'.html')
+    divPlot = loadPlotFromFile(symbol)
+    print(divPlot)
+    return render_template('index.html', divPlot = divPlot)
     #return render_template(url_for('static', filename='plots/' + symbol + '.html'))
