@@ -8,39 +8,39 @@
 
 </head>
 <body>
-    
-    <h1>Dodawanie symbolu</h1>
-
-    <form method="POST" action="/add_symbol">
-        <label for="addSymbol">Symbol:</label>
-        <input type="text" id="addSymbol" name="addSymbol" required>
-
-        <button type="submit">Dodaj</button>
-    </form>
-
+    <div class="new-action">
+        <h1>Dodawanie nowej akcji</h1>
+        <div class="form-group field">
+            <form method="POST" action="/add_symbol" class="form-inside">
+                <input type="text" id="addSymbol" class="form-field" name="addSymbol" placeholder="Symbol akcji" required>
+                <label for="addSymbol" class="form-label">Symbol akcji</label>
+                <button type="submit" class="form-button">Dodaj</button>    
+            </form>
+        </div>
     {% if komunikat %}
         {% if komunikat != "" %}
-            <p>{{ komunikat }}</p>
+            <div id= "komunikat">{{ komunikat }}</div>
         {% endif %}
     {% endif %}
-
-
-    <h1>Formularz wyboru symbolu akcji</h1>
-
-    <form id="stockForm">
-        <label for="selectbox">Wybierz symbol akcji:</label>
-        <select id="selectbox" onchange="updatePlotly()">
-            <option disabled selected value="">Wybierz symbol</option>
-            {% for symbol in symbols %}
-            <option value="{{ symbol }}">{{ symbol }}</option>
-            {% endfor %}
-        </select>
-    </form>
-
-    <div id="plotContainer">
-        PLACEHOLDER
     </div>
 
+    <div class="divider"></div>
+    <div class="chart-action">
+        <h1>Formularz wyboru symbolu akcji</h1>
+        <form id="stockForm">
+            <label for="selectbox" class="form-chart">Wybierz symbol akcji:</label>
+            <select id="selectbox" class="form-select" onchange="updatePlotly()">
+                <option disabled selected value="">Wybierz symbol</option>
+                {% for symbol in symbols %}
+                <option value="{{ symbol }}">{{ symbol }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    
+    <div class="plotContainer" id="plotContainer">
+        <img src="placeholder.png">
+    </div>
     <script>
 
         function updatePlotly() {
