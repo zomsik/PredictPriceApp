@@ -42,9 +42,8 @@ def checkIfDateAlreadyInFile(filename, date):
 
 def saveDataToFile(filename, data): 
     path = os.path.join(folder, filename)
-    if not os.path.exists(path):
-        with open(path, 'w') as file:
-            json.dump(data, file, indent=4)
+    with open(path, 'w') as file:
+        json.dump(data, file, indent=4)
 
 def appendData(filename, data):
     if checkIfFileDataExists(filename):

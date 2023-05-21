@@ -21,10 +21,9 @@ def add_symbol():
 
 
 @server.route('/getPlotData')
-def update_data():
+def get_plot():
     symbol = request.args.get('symbol')
-    #return redirect(url_for('index'))
     divPlot = loadPlotFromFile(symbol)
-    print(divPlot)
+
     return render_template('index.html', divPlot = divPlot)
-    #return render_template(url_for('static', filename='plots/' + symbol + '.html'))
+    

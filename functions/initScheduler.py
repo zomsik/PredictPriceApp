@@ -1,12 +1,13 @@
 import schedule
 import time
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import socket
 from functions.fileManipulation import getSymbolList, loadData, saveDataToFile
 from functions.downloadData import downloadData
 import pandas as pd
 from processing.predict import makePrediction
+import numpy as np
 
 def check_internet_connection():
     try:
@@ -17,12 +18,12 @@ def check_internet_connection():
     return False
 
 def makeDailyTask():
-    today_date = datetime.date.today()  
-    if not check_internet_connection():
+    todayDate = date.today()  
+    if check_internet_connection():
         for symbol in getSymbolList("symbolsPredicted.json"):
             
             symbolData = loadData("data"+symbol+".json")
-            todayData = downloadData(symbol,today_date,today_date)
+            todayData = downloadData(symbol,todayDate,todayDate)
             print(todayData)
             #dodać do danych dzisiejszy dzień i predyktować tydzień
 
@@ -32,11 +33,12 @@ def makeDailyTask():
             symbolData = pd.DataFrame.from_dict(symbolData, orient='index')
             symbolData.index = pd.to_datetime(symbolData.index)
             
+            
             predictedData = loadData(symbol+"_plotData.json")
             predictedData = pd.DataFrame.from_dict(predictedData, orient='index')
             predictedData.index = pd.to_datetime(predictedData.index)
             
-            todayDate = datetime.now().date()
+            #todayDate = datetime.now().date()
 
             lastActualDataEntry = symbolData.iloc[-1]
             PreviousRows = predictedData[predictedData.index >= lastActualDataEntry.name]
@@ -48,32 +50,43 @@ def makeDailyTask():
 
             PreviousRows = PreviousRows.drop(rowsToDelete)
             
-            
-            
             for index, row in PreviousRows.iterrows():
                 symbolData = symbolData.iloc[1:]
-                
-                #tworzenie data_symbol z pozostałych i dodawanie do pliku
-                print()
+                lastClose = symbolData.iloc[-1]["Close"]
                 
                 
+                newPredictedPrice = row["Future"]
                 
+                if np.isnan(newPredictedPrice):
+                    newPredictedPrice = row["Predicted"]
+                
+                newRow = {
+                    "Date": index,
+                    "Open": lastClose,
+                    "High": [None],
+                    "Low": [None],
+                    "Close": newPredictedPrice,
+                    "Adj Close": newPredictedPrice,
+                    "Volume": [None],
+                    "Real": [False]
+                }
+
+                newRowDataFrame = pd.DataFrame(newRow)
+                newRowDataFrame = newRowDataFrame.set_index("Date")
+            
+                symbolData = pd.concat([symbolData, newRowDataFrame])
+            return symbolData
+            symbolData = symbolData.replace(np.nan,None)
             new_data = {}
 
             for index, row in symbolData.iterrows():
                 row_dict = row.to_dict()
                 new_data[index.strftime('%Y-%m-%d')] = row_dict
-                        
+            
+
             saveDataToFile("data_"+symbol+".json", new_data)    
             
             makePrediction(symbol)
-            #do data dodać ten dzień z predykcji i od nowa predyktować tydzień
-
-
-
-
-
-
 
 
 def run_schedule():

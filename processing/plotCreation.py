@@ -33,6 +33,21 @@ def createPlot(symbol):
         name='Actual'
     ))
     
+    
+    fig.add_trace(go.Scatter(
+        x=data['Date'],
+        y=data['Predicted'],
+        mode='lines+markers',
+        marker=dict(
+            size=5, 
+            symbol='circle', 
+            line=dict(
+                width=2,  
+                ),
+            ),
+        name='Predicted'
+    ))
+    
     fig.add_trace(go.Scatter(
         x=data['Date'],
         y=data['Future'],
@@ -47,19 +62,6 @@ def createPlot(symbol):
         name='Future'
         ))
 
-    fig.add_trace(go.Scatter(
-        x=data['Date'],
-        y=data['Predicted'],
-        mode='lines+markers',
-        marker=dict(
-            size=5, 
-            symbol='circle', 
-            line=dict(
-                width=2,  
-                ),
-            ),
-        name='Predicted'
-    ))
         
     divPlot = py.plot(fig, include_plotlyjs=False, output_type='div')
     savePlotToFile(symbol+'.html', divPlot)
