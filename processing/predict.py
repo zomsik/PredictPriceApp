@@ -5,6 +5,7 @@ from tensorflow.keras.layers import Dense, LSTM
 from tensorflow.keras.models import Sequential
 from functions.fileManipulation import loadData, saveDataToFile, appendSymbol
 from processing.plotCreation import createPlot
+from datetime import timedelta
 pastDaysNumber = 30
 predictionDaysNumber = 7
 
@@ -85,8 +86,19 @@ def getPredictionDataFrame(actualDF, Y_):
     predictionDF['Future'] = Y_.flatten()
     predictionDF['Actual'] = None
     predictionDF['Predicted'] = None
+    
+    outputPredictionDf = pd.DataFrame(columns = predictionDF.columns)
+    timeShift = timedelta(days=0)
+    
+    for index, row in predictionDF.iterrows():
+        while (row['Date'] + timeShift).weekday() >= 5:
+            timeShift += timedelta(days=1)
 
-    return predictionDF
+        new_row = row
+        new_row['Date'] = row['Date'] + timeShift
+        outputPredictionDf.loc[index] = new_row
+
+    return outputPredictionDf
 
 def makePrediction(symbol):
     dataJson = loadData("data_"+symbol+".json")
@@ -109,7 +121,7 @@ def makePrediction(symbol):
     dataWithReals = data.join(pastIsReal)
     actualDF = getActualDataFrame(dataWithReals)
     predictionDF = getPredictionDataFrame(actualDF, Y_)
-
+    
     results = pd.concat([actualDF, predictionDF]).set_index('Date')
     results = results.replace(np.nan,None)
     resultsJson = {}

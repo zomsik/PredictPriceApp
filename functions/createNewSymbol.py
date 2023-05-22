@@ -2,7 +2,7 @@ import datetime
 from threading import Thread
 from functions.downloadData import downloadData
 from functions.fileManipulation import saveDataToFile, checkIfSymbolInFile, appendSymbol
-from functions.initScheduler import check_internet_connection
+from server.initScheduler import check_internet_connection
 from processing.predict import makePrediction
 
 def downloadNewSymbolData(symbol):
@@ -15,14 +15,14 @@ def downloadNewSymbolData(symbol):
             if not newDownloadedData.empty:
                 thread = Thread(target=workWithNewData, args=(newDownloadedData, symbol))
                 thread.start()
-                thread.join()
-                return "Pobrano nowy symbol. Będzie on dostępny do wybrania po predykcji"
+
+                return "Pobrano nowy symbol. Będzie on dostępny do wybrania po predykcji", "success"
             else:
-                return "Brak danych dla symbolu - możliwe, że nie istnieje"
+                return "Brak danych dla symbolu - możliwe, że nie istnieje", "error"
         else:
-            return "symbol już został dodany"
+            return "Symbol już został dodany", "info"
     else:
-        return "Brak internetu"
+        return "Brak internetu", "error"
 
 def workWithNewData(newDownloadedData, symbol):
     
